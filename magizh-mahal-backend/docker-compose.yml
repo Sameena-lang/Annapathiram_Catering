@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # MongoDB Database Service
+  mongodb:
+    image: mongo:7.0
+    container_name: magizh_mahal_mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: magizh_mahal_db
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - magizh_network
+
+  # FastAPI Backend Service
+  backend:
+    build: .
+    container_name: magizh_mahal_api
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017
+      - MONGODB_DB_NAME=magizh_mahal_db
+      - APP_ENV=production
+      - DEBUG=False
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - mongodb
+    networks:
+      - magizh_network
+
+volumes:
+  mongo_data:
+
+networks:
+  magizh_network:
+    driver: bridge
